@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<launch>
+  <node pkg="rovio" type="rovio_node" name="rovio" output="screen">
+  <param name="filter_config" value="$(find rovio)/cfg/kaist.info"/>
+  <param name="camera0_config" value="$(find rovio)/cfg/kaist_cam0.yaml"/>
+  <param name="cam0_topic_" value="/camera/image_raw"/>
+  <param name="imu_topic_" value="/imu_raw"/>
+
+  </node>
+</launch>

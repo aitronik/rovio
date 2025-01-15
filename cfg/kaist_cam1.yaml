@@ -1,0 +1,29 @@
+###### Camera Calibration File For Cam 1 of Kaist Urban Datasets ######
+image_width: 1280
+image_height: 560
+camera_name: cam1
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [8.1378205539589999e+02, 0.0, 6.1386419539320002e+02, 0.0, 8.0852165574269998e+02, 2.4941049348650000e+02, 0.0, 0.0, 1.0]
+distortion_model: plumb_bob
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data:  [-5.4921981799999998e-02, 1.4243657430000001e-01, 7.5412299999999996e-05, -6.7560530000000001e-04, 0.0]
+
+###### Original Calibration File ######
+## General sensor definitions.
+# cam1:
+#   T_imu_cam: #rotation from camera to IMU R_CtoI, position of camera in IMU p_CinI
+#     - [-0.01036,-0.01075,0.99990,1.70544]
+#     - [-0.99994,-0.00178,-0.01038,-0.22770]
+#     - [0.00189,-0.99994,-0.01073,-0.11611]
+#     - [0.0, 0.0, 0.0, 1.0]
+#   cam_overlaps: [0]
+#   camera_model: pinhole
+#   distortion_coeffs: [-5.4921981799999998e-02,1.4243657430000001e-01,7.5412299999999996e-05,-6.7560530000000001e-04]
+#   distortion_model: radtan
+#   intrinsics: [8.1378205539589999e+02,8.0852165574269998e+02,6.1386419539320002e+02,2.4941049348650000e+02]
+#   resolution: [1280, 560]
+#   rostopic: /stereo/right/image_left
