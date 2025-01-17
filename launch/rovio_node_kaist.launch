@@ -3,8 +3,11 @@
   <node pkg="rovio" type="rovio_node" name="rovio" output="screen">
   <param name="filter_config" value="$(find rovio)/cfg/kaist.info"/>
   <param name="camera0_config" value="$(find rovio)/cfg/kaist_cam0.yaml"/>
-  <param name="cam0_topic_" value="/camera/image_raw"/>
-  <param name="imu_topic_" value="/imu_raw"/>
+  <param name="camera1_config" value="$(find rovio)/cfg/kaist_cam1.yaml"/>
+  <param name="cam0_topic_" value="/stereo/left/image_raw"/>
+  <param name="cam1_topic_" value="/stereo/right/image_raw"/>
+  <param name="imu_topic_" value="/imu/data_raw"/>
 
   </node>
+  <node name="GPS2local" pkg="rovio" type="GPS2local" output="screen" />
 </launch>

@@ -26,4 +26,4 @@ distortion_coefficients:
 #   distortion_model: radtan
 #   intrinsics: [8.1378205539589999e+02,8.0852165574269998e+02,6.1386419539320002e+02,2.4941049348650000e+02]
 #   resolution: [1280, 560]
-#   rostopic: /stereo/right/image_left
+#   rostopic: /stereo/right/image_raw

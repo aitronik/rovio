@@ -39,6 +39,7 @@
 #include <geometry_msgs/TransformStamped.h>
 #include <geometry_msgs/TwistWithCovarianceStamped.h>
 #include <nav_msgs/Odometry.h>
+#include <nav_msgs/Path.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
@@ -146,6 +147,7 @@ class RovioNode{
   ros::Publisher pubMarkers_;          /**<Publisher: Ros line marker, indicating the depth uncertainty of a landmark.*/
   ros::Publisher pubExtrinsics_[mtState::nCam_];
   ros::Publisher pubImuBias_;
+  ros::Publisher pub_path;
 
   // Ros Messages
   geometry_msgs::TransformStamped transformMsg_;
@@ -157,6 +159,7 @@ class RovioNode{
   sensor_msgs::PointCloud2 patchMsg_;
   visualization_msgs::Marker markerMsg_;
   sensor_msgs::Imu imuBiasMsg_;
+  nav_msgs::Path body_path;
   int msgSeq_;
 
   // Rovio outputs and coordinate transformations
@@ -183,6 +186,11 @@ class RovioNode{
   std::string camera_frame_;
   std::string imu_frame_;
 
+  // ROS topic names
+  std::string imu_topic_;
+  std::string cam0_topic_;
+  std::string cam1_topic_;
+
   /** \brief Constructor
    */
   RovioNode(ros::NodeHandle& nh, ros::NodeHandle& nh_private, std::shared_ptr<mtFilter> mpFilter)
@@ -205,9 +213,12 @@ class RovioNode{
     gotFirstMessages_ = false;
 
     // Subscribe topics
-    subImu_ = nh_.subscribe("imu0", 1000, &RovioNode::imuCallback,this);
-    subImg0_ = nh_.subscribe("cam0/image_raw", 1000, &RovioNode::imgCallback0,this);
-    subImg1_ = nh_.subscribe("cam1/image_raw", 1000, &RovioNode::imgCallback1,this);
+    nh_private_.param("imu_topic_", imu_topic_, imu_topic_);
+    nh_private_.param("cam0_topic_", cam0_topic_, cam0_topic_);
+    nh_private_.param("cam1_topic_", cam1_topic_, cam1_topic_);
+    subImu_ = nh_.subscribe(imu_topic_, 1000, &RovioNode::imuCallback,this);
+    subImg0_ = nh_.subscribe(cam0_topic_, 1000, &RovioNode::imgCallback0,this);
+    subImg1_ = nh_.subscribe(cam1_topic_, 1000, &RovioNode::imgCallback1,this);
     subGroundtruth_ = nh_.subscribe("pose", 1000, &RovioNode::groundtruthCallback,this);
     subGroundtruthOdometry_ = nh_.subscribe("odometry", 1000, &RovioNode::groundtruthOdometryCallback, this);
     subVelocity_ = nh_.subscribe("abss/twist", 1000, &RovioNode::velocityCallback,this);
@@ -223,6 +234,7 @@ class RovioNode{
     pubPcl_ = nh_.advertise<sensor_msgs::PointCloud2>("rovio/pcl", 1);
     pubPatch_ = nh_.advertise<sensor_msgs::PointCloud2>("rovio/patch", 1);
     pubMarkers_ = nh_.advertise<visualization_msgs::Marker>("rovio/markers", 1 );
+    pub_path = nh.advertise<nav_msgs::Path>("/body/path", 10);
 
     pub_T_J_W_transform = nh_.advertise<geometry_msgs::TransformStamped>("rovio/T_G_W", 1);
     for(int camID=0;camID<mtState::nCam_;camID++){
@@ -231,10 +243,10 @@ class RovioNode{
     pubImuBias_ = nh_.advertise<sensor_msgs::Imu>("rovio/imu_biases", 1 );
 
     // Handle coordinate frame naming
-    map_frame_ = "/map";
-    world_frame_ = "/world";
-    camera_frame_ = "/camera";
-    imu_frame_ = "/imu";
+    map_frame_ = "map";
+    world_frame_ = "world";
+    camera_frame_ = "camera";
+    imu_frame_ = "imu";
     nh_private_.param("map_frame", map_frame_, map_frame_);
     nh_private_.param("world_frame", world_frame_, world_frame_);
     nh_private_.param("camera_frame", camera_frame_, camera_frame_);
@@ -477,6 +489,7 @@ class RovioNode{
    */
   void imgCallback0(const sensor_msgs::ImageConstPtr & img){
     std::lock_guard<std::mutex> lock(m_filter_);
+    
     imgCallback(img,0);
   }
 
@@ -664,7 +677,7 @@ class RovioNode{
 
         // Obtain the save filter state.
         mtFilterState& filterState = mpFilter_->safe_;
-	mtState& state = mpFilter_->safe_.state_;
+	      mtState& state = mpFilter_->safe_.state_;
         state.updateMultiCameraExtrinsics(&mpFilter_->multiCamera_);
         MXD& cov = mpFilter_->safe_.cov_;
         imuOutputCT_.transformState(state,imuOutput_);
@@ -704,6 +717,18 @@ class RovioNode{
         tf_transform_MW.setOrigin(tf::Vector3(imuOutput_.WrWB()(0),imuOutput_.WrWB()(1),imuOutput_.WrWB()(2)));
         tf_transform_MW.setRotation(tf::Quaternion(imuOutput_.qBW().x(),imuOutput_.qBW().y(),imuOutput_.qBW().z(),-imuOutput_.qBW().w()));
         tb_.sendTransform(tf_transform_MW);
+
+        // Publish body path
+        tf::Vector3 position(imuOutput_.WrWB()(0),imuOutput_.WrWB()(1),imuOutput_.WrWB()(2));
+        geometry_msgs::PoseStamped body_pose_stamped;
+        body_pose_stamped.header = odometryMsg_.header;
+        body_pose_stamped.pose.position.x = position.x();
+        body_pose_stamped.pose.position.y = position.y();
+        body_pose_stamped.pose.position.z = position.z();
+        body_path.header = odometryMsg_.header;
+        body_path.poses.push_back(body_pose_stamped);
+
+        pub_path.publish(body_path);
 
         // Send camera pose.
         for(int camID=0;camID<mtState::nCam_;camID++){
@@ -754,6 +779,16 @@ class RovioNode{
               odometryMsg_.twist.covariance[j+6*i] = imuOutputCov_(ind1,ind2);
             }
           }
+          // Stampa i valori della covarianza associati a x, y, e z
+          // std::cout << "Covarianza posizione (x, y, z):" << std::endl;
+          // for (unsigned int i = 0; i < 3; i++) { // Solo i primi 3 indici per x, y, z
+          //   for (unsigned int j = 0; j < 3; j++) { // Solo i primi 3 indici per x, y, z
+          //       unsigned int ind1 = mtOutput::template getId<mtOutput::_pos>() + i;
+          //       unsigned int ind2 = mtOutput::template getId<mtOutput::_pos>() + j;
+          //       std::cout << "Cov(" << i << ", " << j << ") = " << imuOutputCov_(ind1, ind2) << std::endl;
+          //   }
+          // }
+
           pubOdometry_.publish(odometryMsg_);
         }
 

@@ -65,7 +65,7 @@ static constexpr int patchSize_ = 6; // Edge length of the patches (in pixel). M
 #ifdef ROVIO_NCAM
 static constexpr int nCam_ = ROVIO_NCAM;
 #else
-static constexpr int nCam_ = 1; // Used total number of cameras.
+static constexpr int nCam_ = 2; // Used total number of cameras.
 #endif
 
 #ifdef ROVIO_NPOSE
@@ -86,6 +86,7 @@ void idleFunc(){
 #endif
 
 int main(int argc, char** argv){
+  std::cout << "nCam_:  " << nCam_ << std::endl;
   ros::init(argc, argv, "rovio");
   ros::NodeHandle nh;
   ros::NodeHandle nh_private("~");
