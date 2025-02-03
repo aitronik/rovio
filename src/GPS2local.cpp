@@ -63,7 +63,8 @@ void imuCallback(const sensor_msgs::Imu::ConstPtr& msg) {
     double roll, pitch, quat_yaw;
     tf2::Matrix3x3(quat).getRPY(roll, pitch, quat_yaw);
 
-    yaw = - quat_yaw - 0.24;
+    yaw = quat_yaw + 3.55;              // Kaist 28
+    // yaw = quat_yaw + 1.2;              // Kaist 33
     }
 }
 

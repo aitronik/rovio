@@ -9,5 +9,15 @@
   <param name="imu_topic_" value="/imu/data_raw"/>
 
   </node>
+
+  <!-- Scheletro trasformazione base_link-sensori -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="base_to_imu_static_tf" args="+0.07 0 -1.7 0 0 0 imu base_link"/>
+  <!-- base_to_right_lidar_static_rot: -pi/4, 3/4*pi, pi -->
+  <!-- base_to_left_lidar_static_rot: pi/4, 3/4*pi, pi --> 
+  <node pkg="tf2_ros" type="static_transform_publisher" name="base_to_left_lidar_static_tf" args="-0.334623 0.431973 1.94043 -0.3472435 0.1513755 0.8574812 0.3481858 base_link left_velodyne"/>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="base_to_right_lidar_static_tf" args="-0.333596 -0.373928 1.94377 -0.3486921 -0.1495609 0.8572584 -0.3480709 base_link right_velodyne"/>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="base_to_gps_static_tf" args="-0.32 0 1.7 0 0 0 base_link gps_link"/>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="base_to_left_camera_tf" args="1.64239 0.247401 1.58411 -1.42749255 0 -1.42749255 base_link xacro_left_camera"/>
+
   <node name="GPS2local" pkg="rovio" type="GPS2local" output="screen" />
 </launch>
