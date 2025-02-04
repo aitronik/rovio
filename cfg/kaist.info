@@ -100,8 +100,8 @@ ImgUpdate
     statMinGlobalQualityRange 100;								Minimum number of frames for obtaining maximal global quality
     trackingUpperBound 0.9;										Threshold for local quality for min overall global quality
     trackingLowerBound 0.8;										Threshold for local quality for max overall global quality
-    minTrackedAndFreeFeatures 0.75;								Minimum of amount of feature which are either tracked or free, con 1 da performance migliori nelle zone più critiche (non deve superare 1)
-    removalFactor 1.1;											Factor for enforcing feature removal if not enough free
+    minTrackedAndFreeFeatures 1;								Minimum of amount of feature which are either tracked or free, con 1 da performance migliori nelle zone più critiche (non deve superare 1)
+    removalFactor 1.1;											Factor for enforcing feature removal if not enough free     NON mettere =1
     minRelativeSTScore 0.75;									Minimum relative ST-score for extracting new feature patch
     minAbsoluteSTScore 5.0;										Minimum absolute ST-score for extracting new feature patch
     minTimeBetweenPatchUpdate 1.0;								Minimum time between new multilevel patch extrection [s]
@@ -109,7 +109,7 @@ ImgUpdate
     alignConvergencePixelRange 10;								Assumed convergence range for image alignment (gets scaled with the level) [pixels]
     alignCoverageRatio 2;										How many sigma of the uncertainty should be covered in the adaptive alignement
     alignMaxUniSample 1;										Maximal number of alignment seeds on one side -> total number of sample = 2n+1. Carefull can get very costly if diverging!
-    patchRejectionTh 50.0;										If the average itensity error is larger than this the feauture is rejected [intensity], if smaller 0 the no check is performed
+    patchRejectionTh 50.0;										If the average intensity error is larger than this the feauture is rejected [intensity], if smaller 0 the no check is performed     discutere se ha senso con una dev stand di +-20
     alignmentHuberNormThreshold 10;								Intensity error threshold for Huber norm (enabled if > 0)
     alignmentGaussianWeightingSigma -1;							Width of Gaussian which is used for pixel error weighting (enabled if > 0)
     alignmentGradientExponent 0.0;								Exponent used for gradient based weighting of residuals
@@ -124,7 +124,7 @@ ImgUpdate
     discriminativeSamplingGain 1.1;								Gain for threshold above which the samples must lie (if <= 1.0 the patchRejectionTh is used).
     MotionDetection
     {
-    	isEnabled 0;											Is the motion detection enabled
+    	isEnabled 1;											Is the motion detection enabled
 	    rateOfMovingFeaturesTh 0.5;								Amount of feature with motion for overall motion detection
 	    pixelCoordinateMotionTh 1.0;							Threshold for motion detection for patched [pixels]
 	    minFeatureCountForNoMotionDetection 5;					Min feature count in frame for motion detection
@@ -139,7 +139,7 @@ ImgUpdate
         }
         MahalanobisTh0 7.689997599999999;						Mahalanobid distance for zero velocity updates
         minNoMotionTime 1.0;									Min duration of no-motion
-        isEnabled 0;											Should zero velocity update be applied, only works if MotionDetection.isEnabled is true
+        isEnabled 1;											Should zero velocity update be applied, only works if MotionDetection.isEnabled is true
     }
 }
 Prediction
